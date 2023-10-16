@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irrigation Monitoring Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body class="container mt-5">
+    <h2>Irrigation Monitoring Dashboard</h2>
+    
+    <canvas id="dataChart" width="400" height="200"></canvas>
+    
+    <script>
+        function fetchData() {
+            $.getJSON('/get_data', function(data) {
+                let moistureData = data.map(entry => entry.moisture);
+                let temperatureData = data.map(entry => entry.temperature);
+                let timestamps = data.map(entry => entry.timestamp);
+
+                let ctx = document.getElementById('dataChart').getContext('2d');
+                let chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: timestamps,
+                        datasets: [{
+                            label: 'Moisture Level',
+                            data: moistureData,
+                            borderColor: 'blue',
+                            fill: false
+                        }, {
+                            label: 'Temperature (°C)',
+                            data: temperatureData,
+                            borderColor: 'red',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                type: 'time',
+                                time: {
+                                    unit: 'minute'
+                                }
+                            }]
+                        }
+                    }
+                });
+            });
+        }
+
+        // Fetch data every 10 seconds
+        setInterval(fetchData, 10000);
+        fetchData();  // Initial fetch
+    </script>
+</body>
+</html>
